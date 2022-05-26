@@ -1,3 +1,11 @@
+# Final Project and Exam for CC15
+# Members:
+# - Michael Don Alaiza
+# - Raymond Rejas
+# - Mark Elson Palmere
+# - George Jose Montano
+
+
 import tkinter as tk
 from tkinter import DISABLED, StringVar, messagebox
 from tkinter import filedialog
@@ -8,12 +16,11 @@ import pymysql
 import password_db_config
 from encrypt_pass import *
 from generate_pass import *
-import datetime
 
 
-# pull test
+# ===== FUNCTIONS =====
 
-# functions
+# connect to database
 def connect():
     con = pymysql.connect(host=password_db_config.DB_SERVER,
                                 user=password_db_config.DB_USER,
@@ -22,6 +29,7 @@ def connect():
                                 port=password_db_config.DB_PORT)
     return con
 
+# function to show active tab
 def on_tab_selected(event):
     selected_tab = event.widget.select()
     tab_text = event.widget.tab(selected_tab, "text")
@@ -36,10 +44,12 @@ def on_tab_selected(event):
     clear()
     clear_treeview()
 
+# function to convert error to messagebox
 def database_error(err):
     messagebox.showinfo("Error", err)
     return False
 
+# function to clear entry fields of selected tab
 def clear():
     tab = tab_parent.select()
     print(tab)
@@ -62,6 +72,7 @@ def clear():
         delete_username.set("")
         delWebEntry.focus()
 
+# function to generate a random password
 def generate_password():
     password = randomPass(characters)
     tab = tab_parent.select()
@@ -70,6 +81,7 @@ def generate_password():
     if tab == ".!notebook.!frame3":
         update_new_password.set(password)
 
+# function to add new account
 def add_new_account():
     if add_website.get() == "" or add_username.get() == "" or add_password.get() == "":
         messagebox.showerror("Error", "Please fill in all fields")
@@ -94,6 +106,7 @@ def add_new_account():
         clear()
     return
 
+# function to delete an account
 def delete_account():
     if delete_website.get() == "" or delete_username.get() == "":
         messagebox.showerror("Error", "Please fill in all fields")
@@ -123,6 +136,7 @@ def delete_account():
         clear()
     return
     
+# function to update an account
 def update_account():
     if update_website.get() == "" or update_username.get() == "":
         messagebox.showerror("Error", "Please fill in all fields")
@@ -162,6 +176,7 @@ def update_account():
     clear()
     return
 
+# function to get old password from database
 def call_pass(event):
     try:
         con = connect()
@@ -178,6 +193,7 @@ def call_pass(event):
                 pymysql.DatabaseError) as e:
             has_loaded_successfully = database_error(e)
 
+# function to direct search to website_search, username_search, or website_username_search
 def conditional_search():
     clear_treeview()
     if search_website.get() != "" and search_username.get() == "":
@@ -190,6 +206,7 @@ def conditional_search():
         messagebox.showerror("Error","Please Enter a Search Term")  
     return
 
+# function to search for accounts by website
 def website_search():
     try:
         con = connect()
@@ -215,6 +232,7 @@ def website_search():
             has_loaded_successfully = database_error(e)
     return
 
+# function to search for accounts by username
 def username_search():
     try:
         con = connect()
@@ -240,6 +258,7 @@ def username_search():
             has_loaded_successfully = database_error(e)
     return
 
+# function to search for accounts by website and username
 def website_username_search():
     try:
         con = connect()
@@ -291,7 +310,7 @@ def clear_treeview():
     tree.delete(*tree.get_children())
     return
 
-# create a function to save treeview to a text file
+# function to save current treeview to a text file
 def save_treeview():
     file = filedialog.asksaveasfile(mode='w', defaultextension=".txt", filetypes=[('Text File', '*.txt')], initialfile="accounts.txt")
     if file is None:
@@ -301,7 +320,7 @@ def save_treeview():
     file.close()
     return
 
-# create a function to load treeview from a text file
+# function to load treeview from a text file
 def load_treeview():
     file = filedialog.askopenfile(mode='r', defaultextension=".txt", filetypes=[('Text File', '*.txt')])
     if file is None:
@@ -314,6 +333,7 @@ def load_treeview():
     file.close()
     return
 
+# function to export all accounts to a text file
 def export_accounts():
     try:
         con = connect()
@@ -351,10 +371,11 @@ def about():
                                 "and Alaiza, Michael Don")
     
 
-# variables
+# ===== VARIABLES =====
+
 shift = 5
 
-# main window
+# ===== MAIN WINDOW =====
 
 mywindow = tk.Tk() #Change the name for every window you make
 mywindow.title("Password Manager") #This will be the window title
@@ -363,6 +384,7 @@ mywindow.minsize(430, 280) #This will be set a limit for the window's minimum si
 mywindow.configure(bg="grey") #This will be the background color
 mywindow.resizable(0,0) #This will disable the ability to resize the window
 
+# ===== MENU BAR =====
 
 menubar = Menu(mywindow)
 filemenu = Menu(menubar, tearoff=0)
@@ -376,7 +398,8 @@ menubar.add_cascade(label="File", menu=filemenu)
 helpmenu = Menu(menubar, tearoff=0)
 helpmenu.add_command(label="About...", command=about)
 menubar.add_cascade(label="Help", menu=helpmenu)
-# ===TABS===
+
+# ===== TABS =====
 
 tab_parent = ttk.Notebook(mywindow)
 tab1 = ttk.Frame(tab_parent)
@@ -390,7 +413,7 @@ tab_parent.add(tab3, text="Update Old Account")
 tab_parent.add(tab4, text="Delete Old Account")
 tab_parent.pack(expand=1, fill='both')
 
-# ===WIDGETS===
+# === WIDGET VARIABLES ===
 search_website = StringVar()
 search_username = StringVar()
 search_website.set("")
@@ -415,8 +438,8 @@ delete_website.set("")
 delete_username.set("")
 
 
-# ===TAB 1===
-# create a frame for the tab 1 with a fixed height and color and anchored at top
+# ===== TAB 1 =====
+
 tab1_frame = tk.Frame(tab1, height=100, width=400, borderwidth=1)
 tab1_frame.pack(expand=1, fill='x', anchor='n')
 
@@ -434,10 +457,9 @@ tree.pack(expand=1, fill='x')
 
 scrollbar.config(command=tree.yview)
 
-
 tab1_frame2 = tk.LabelFrame(tab1, height=100, width=400, borderwidth=1, text="Search")
 tab1_frame2.pack(expand=1, fill='x', anchor='n')
-# create entry boxes for the tab1_frame2
+
 searchWebLabel = tk.Label(tab1_frame2, text="Website:")
 searchUsernameLabel = tk.Label(tab1_frame2, text="Username:")
 
@@ -448,12 +470,11 @@ searchUsernameLabel.grid(row=0, column=2, sticky="n", padx=5, pady=5)
 searchWebEntry.grid(row=0, column=1, sticky="n", padx=5, pady=5)
 searchUsernameEntry.grid(row=0, column=3, sticky="n", padx=5, pady=5)
 
-# create a button for the tab1_frame2 below the entry boxes
 searchButton = tk.Button(tab1_frame2, text="Search", command=conditional_search)
 searchButton.grid(row=0, column=4, sticky="n", padx=5, pady=5)
 
+# ===== TAB 2 =====
 
-# tab2
 addAppLabel = tk.Label(tab2, text="Website/Application:")
 addUserLabel = tk.Label(tab2, text="Username:")
 addPasswordLabel = tk.Label(tab2, text="Password:")
@@ -465,7 +486,8 @@ addPasswordEntry = tk.Entry(tab2, textvariable=add_password, state=NORMAL)
 buttonGenerate = tk.Button(tab2, text="Generate", command=generate_password)
 buttonAdd = tk.Button(tab2, text="Add", command=check_account)
 
-# tab3
+# ===== TAB 3 =====
+
 updateAppLabel = tk.Label(tab3, text="Website/Application:")
 updateUserLabel = tk.Label(tab3, text="Username:")
 updateOldPasswordLabel = tk.Label(tab3, text="Old Password:")
@@ -482,7 +504,8 @@ updateUserEntry.bind("<Tab>",call_pass)
 buttonGenerate2 = tk.Button(tab3, text="Generate", command=generate_password)
 buttonUpdate = tk.Button(tab3, text="Update", command=update_account)
 
-# tab4
+# ===== TAB 4 =====
+
 delAppLabel = tk.Label(tab4, text="Website/Application:")
 delUserLabel = tk.Label(tab4, text="Username:")
 
@@ -534,5 +557,7 @@ delUserEntry.grid(row=1, column=1, padx=15, pady=15)
 
 buttonDel.grid(row=3, column=2, padx=15, pady=15)
 
+# ===== MAINLOOP =====
+
 mywindow.config(menu=menubar)
-mywindow.mainloop() #You must add this at the end to show the window
+mywindow.mainloop()
