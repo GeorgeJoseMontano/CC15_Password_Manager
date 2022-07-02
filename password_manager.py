@@ -196,7 +196,9 @@ def call_pass(event):
 # function to direct search to website_search, username_search, or website_username_search
 def conditional_search():
     clear_treeview()
-    if search_website.get() != "" and search_username.get() == "":
+    if search_website.get().lower() == "all" or search_username.get().lower() == "all":
+        show_all()
+    elif search_website.get() != "" and search_username.get() == "":
         website_search()
     elif search_website.get() == "" and search_username.get() != "":
         username_search()
@@ -204,6 +206,27 @@ def conditional_search():
         website_username_search()
     else:
         messagebox.showerror("Error","Please Enter a Search Term")  
+    return
+
+# function to show all accounts in database
+def show_all():
+    clear_treeview()
+    try:
+        con = connect()
+        cur = con.cursor()
+        sql = """Select * from `accounts`"""
+        cur.execute(sql)
+        for row in cur.fetchall():
+            tree.insert("", "end", values=(row[0], row[1], decrypt(row[2], shift)))
+        con.commit()
+        cur.close()
+        con.close()
+    except (pymysql.InternalError, pymysql.OperationalError, 
+                pymysql.DataError, 
+                pymysql.IntegrityError, 
+                pymysql.NotSupportedError,  
+                pymysql.DatabaseError) as e:
+        has_loaded_successfully = database_error(e)
     return
 
 # function to search for accounts by website
